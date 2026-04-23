@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin — Cinemix Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#080808;--white:#f0ede8;--accent:#6dd230;
+  --gray:#111;--mid:#1e1e1e;--border:#2a2a2a;--muted:#555;
+  --red:#e84a4a;--hover:#161616;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+
+/* ── LOGIN ── */
+.login{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:40px;}
+.login-logo{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.login-logo-name{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:6px;color:var(--white);}
+.login-logo-tag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;}
+.login-box{background:var(--gray);border:1px solid var(--border);padding:40px;width:360px;display:flex;flex-direction:column;gap:14px;}
+.login-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;display:block;}
+.login-input{background:#0d0d0d;border:1px solid var(--border);color:var(--white);padding:13px 16px;font-family:'Space Mono',monospace;font-size:12px;width:100%;outline:none;transition:border-color .3s;letter-spacing:1px;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{background:var(--accent);color:#080808;border:none;padding:14px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;cursor:pointer;transition:all .3s;width:100%;margin-top:4px;}
+.login-btn:hover{background:var(--white);}
+.login-err{font-family:'Space Mono',monospace;font-size:9px;color:var(--red);letter-spacing:1px;display:none;text-align:center;}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;display:none;}
+
+/* ── SIDEBAR ── */
+.sb{background:var(--gray);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+.sb-top{padding:24px 20px;border-bottom:1px solid var(--border);}
+.sb-logo{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:3px;color:var(--white);display:block;text-decoration:none;}
+.sb-tag{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-top:2px;}
+.sb-nav{padding:12px 0;flex:1;overflow-y:auto;}
+.sb-group{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--border);text-transform:uppercase;padding:14px 18px 5px;}
+.sb-btn{display:flex;align-items:center;gap:10px;padding:9px 18px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:pointer;transition:all .25s;width:100%;text-align:left;border-left:2px solid transparent;}
+.sb-btn:hover{color:var(--white);background:rgba(255,255,255,.02);}
+.sb-btn.on{color:var(--accent);border-left-color:var(--accent);background:rgba(109,210,48,.04);}
+.sb-btn .ic{font-size:13px;width:16px;text-align:center;flex-shrink:0;}
+.sb-foot{padding:14px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.sb-view{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .3s;}
+.sb-view:hover{color:var(--accent);}
+.sb-out{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;background:none;border:1px solid var(--border);padding:7px 12px;cursor:pointer;transition:all .3s;width:100%;}
+.sb-out:hover{border-color:var(--red);color:var(--red);}
+
+/* ── MAIN ── */
+.main{overflow-y:auto;}
+.panel{display:none;padding:36px 44px 80px;}
+.panel.on{display:block;}
+
+/* ── PAGE HEADER ── */
+.ph{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.ph-left{}
+.ph-title{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:2px;line-height:1;}
+.ph-sub{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+
+/* ── ADD BUTTON ── */
+.btn-add{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#080808;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:11px 22px;cursor:pointer;transition:all .3s;}
+.btn-add:hover{background:var(--white);transform:translateY(-1px);}
+.btn-add .plus{font-size:16px;font-weight:400;line-height:1;}
+.btn-sec{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid var(--accent);color:var(--accent);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;transition:all .3s;}
+.btn-sec:hover{background:var(--accent);color:#080808;}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:32px;}
+.stat-box{background:var(--gray);border:1px solid var(--border);padding:20px;transition:border-color .3s;}
+.stat-box:hover{border-color:var(--accent);}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--accent);line-height:1;letter-spacing:1px;}
+.stat-l{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:4px;}
+
+/* ── QUICK GUIDE ── */
+.guide{background:var(--gray);border:1px solid var(--border);padding:24px;border-left:2px solid var(--accent);}
+.guide-title{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;}
+.guide-step{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);}
+.guide-step:last-child{border-bottom:none;}
+.guide-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);line-height:1;flex-shrink:0;width:24px;}
+.guide-txt{font-size:13px;color:var(--muted);line-height:1.6;padding-top:2px;}
+.guide-txt strong{color:var(--white);}
+
+/* ── DYNAMIC GALLERY (hover expand) ── */
+.dyn-gallery{display:flex;gap:3px;height:420px;margin-bottom:24px;}
+.dyn-item{position:relative;overflow:hidden;cursor:pointer;flex:1;transition:flex .5s cubic-bezier(.25,.46,.45,.94);background:var(--gray);border:1px solid var(--border);}
+.dyn-item:hover{flex:3.5;}
+.dyn-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease,filter .4s;}
+.dyn-item:hover img{transform:scale(1.04);filter:brightness(.7);}
+.dyn-item-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,.95) 0%,transparent 50%);opacity:0;transition:opacity .4s;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;}
+.dyn-item:hover .dyn-item-ov{opacity:1;}
+.dyn-item-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dyn-item-meta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
+.dyn-item-actions{display:flex;gap:6px;margin-top:10px;}
+.dyn-item-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--border);}
+.dyn-item-ph span{font-size:28px;opacity:.3;}
+.dyn-item-ph p{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+
+/* ── IMAGE GRID (library) ── */
+.img-grid{columns:4;gap:3px;margin-bottom:24px;}
+.img-grid-item{position:relative;overflow:hidden;break-inside:avoid;margin-bottom:3px;cursor:pointer;background:var(--gray);border:1px solid var(--border);transition:border-color .3s;}
+.img-grid-item:hover{border-color:var(--accent);}
+.img-grid-item img{width:100%;display:block;transition:transform .4s ease;}
+.img-grid-item:hover img{transform:scale(1.04);}
+.img-grid-ov{position:absolute;inset:0;background:rgba(8,8,8,.7);opacity:0;transition:opacity .3s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.img-grid-item:hover .img-grid-ov{opacity:1;}
+.img-id{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--accent);text-align:center;padding:0 8px;word-break:break-all;}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:1px dashed var(--border);padding:36px;text-align:center;cursor:pointer;transition:all .3s;position:relative;margin-bottom:24px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(109,210,48,.02);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-zone-icon{font-size:32px;margin-bottom:12px;opacity:.3;}
+.upload-zone-txt{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.upload-zone-txt span{color:var(--accent);}
+
+/* ── VIDEO LIST ── */
+.vid-list{display:flex;flex-direction:column;gap:3px;}
+.vid-row{display:grid;grid-template-columns:100px 1fr auto;gap:0;background:var(--gray);border:1px solid var(--border);overflow:hidden;transition:border-color .3s;}
+.vid-row:hover{border-color:var(--accent);}
+.vid-thumb-wrap{position:relative;overflow:hidden;}
+.vid-thumb-wrap img,.vid-thumb-ph{width:100%;height:64px;object-fit:cover;display:block;}
+.vid-thumb-ph{background:var(--mid);display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.3;}
+.vid-play-ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.4);opacity:0;transition:opacity .3s;}
+.vid-row:hover .vid-play-ic{opacity:1;}
+.vid-play-ic svg{width:18px;height:18px;fill:var(--accent);}
+.vid-info{padding:12px 18px;display:flex;flex-direction:column;justify-content:center;gap:3px;}
+.vid-info-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;line-height:1;}
+.vid-info-meta{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.vid-info-yt{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--accent);}
+.vid-actions{padding:12px 16px;display:flex;align-items:center;gap:6px;}
+.badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;font-weight:700;}
+.b-yt{background:#ff0000;color:#fff;}.b-cm{background:var(--accent);color:#080808;}.b-fm{background:#fff;color:#080808;}
+
+/* ── CAT GRID ── */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:24px;}
+.cat-item{position:relative;overflow:hidden;aspect-ratio:3/4;cursor:pointer;background:var(--gray);border:1px solid var(--border);transition:border-color .3s;}
+.cat-item:hover{border-color:var(--accent);}
+.cat-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease,filter .4s;}
+.cat-item:hover img{transform:scale(1.06);filter:brightness(.35);}
+.cat-item-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,.9) 0%,transparent 50%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;}
+.cat-item-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;}
+.cat-item-count{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+.cat-item-acts{display:flex;gap:5px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;}
+.cat-item:hover .cat-item-acts{opacity:1;transform:translateY(0);}
+.cat-add{background:var(--gray);border:1px dashed var(--border);aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:border-color .3s;}
+.cat-add:hover{border-color:var(--accent);}
+.cat-add-icon{font-size:28px;color:var(--accent);}
+.cat-add-txt{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+
+/* ── SITE INFO FORM ── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:24px;}
+.info-field{background:var(--gray);border:1px solid var(--border);padding:18px;}
+.info-label{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block;}
+.info-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--white);padding:6px 0;font-family:'DM Sans',sans-serif;font-size:14px;width:100%;outline:none;transition:border-color .3s;}
+.info-input:focus{border-bottom-color:var(--accent);}
+
+/* ── EXPORT ── */
+.export-card{background:var(--gray);border:1px solid var(--border);padding:28px;margin-bottom:3px;transition:border-color .3s;}
+.export-card:hover{border-color:var(--accent);}
+.export-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:6px;}
+.export-desc{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:18px;}
+.export-steps{display:flex;flex-direction:column;gap:0;}
+.export-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.export-step:last-child{border-bottom:none;}
+.export-step-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);width:20px;flex-shrink:0;}
+.export-step-txt{font-size:13px;color:var(--muted);}
+.export-step-txt code{color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:60px 20px;overflow-y:auto;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--gray);border:1px solid var(--border);padding:0;width:100%;max-width:580px;}
+.modal-head{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;}
+.modal-x{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;transition:color .3s;line-height:1;}
+.modal-x:hover{color:var(--white);}
+.modal-body{padding:28px;}
+.modal-foot{padding:18px 28px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+
+/* ── FORM ELEMENTS ── */
+.fg{margin-bottom:16px;}
+.fl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;}
+.fi,.fs,.ft{background:#0d0d0d;border:1px solid var(--border);color:var(--white);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;width:100%;outline:none;transition:border-color .3s;}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--accent);}
+.fs{cursor:pointer;}
+.ft{min-height:80px;resize:vertical;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fi-hint{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--muted);margin-top:4px;}
+.fm-select{background:#0d0d0d;border:1px solid var(--border);color:var(--white);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;width:100%;outline:none;min-height:100px;transition:border-color .3s;}
+.fm-select:focus{border-color:var(--accent);}
+
+/* ── BUTTONS ── */
+.btn-save{background:var(--accent);color:#080808;border:none;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:12px 26px;cursor:pointer;transition:all .3s;}
+.btn-save:hover{background:var(--white);}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:11px 22px;cursor:pointer;transition:all .3s;}
+.btn-cancel:hover{border-color:var(--white);color:var(--white);}
+.btn-sm{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border:none;cursor:pointer;transition:all .3s;}
+.btn-sm-e{background:rgba(255,255,255,.08);color:var(--white);}
+.btn-sm-e:hover{background:var(--accent);color:#080808;}
+.btn-sm-d{background:rgba(232,74,74,.1);color:var(--red);}
+.btn-sm-d:hover{background:var(--red);color:#fff;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#080808;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:12px 22px;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* ── PROJ SECTION HEADER ── */
+.sec-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.sec-hd-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;}
+.sec-hd-count{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sb{display:none;}
+  .panel{padding:24px 20px 60px;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .dyn-gallery{height:280px;}
+  .info-grid{grid-template-columns:1fr;}
+  .img-grid{columns:2;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <div class="login-logo">
+    <div class="login-logo-name">CINEMIX</div>
+    <div class="login-logo-tag">Admin Panel</div>
+  </div>
+  <div class="login-box">
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="pwInput" placeholder="Enter password" />
+    <button class="login-btn" onclick="doLogin()">Enter</button>
+    <p class="login-err" id="loginErr">Incorrect password — try again</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sb">
+    <div class="sb-top">
+      <a href="index.html" target="_blank" class="sb-logo">CINEMIX</a>
+      <div class="sb-tag">Admin</div>
+    </div>
+    <nav class="sb-nav">
+      <p class="sb-group">Overview</p>
+      <button class="sb-btn on" onclick="show('dashboard',this)"><span class="ic">▦</span>Dashboard</button>
+      <p class="sb-group">Photography</p>
+      <button class="sb-btn" onclick="show('imglib',this)"><span class="ic">🖼</span>Image Library</button>
+      <button class="sb-btn" onclick="show('categories',this)"><span class="ic">📁</span>Categories</button>
+      <button class="sb-btn" onclick="show('projects',this)"><span class="ic">📸</span>Projects</button>
+      <p class="sb-group">Video</p>
+      <button class="sb-btn" onclick="show('videos',this)"><span class="ic">🎬</span>Videos</button>
+      <p class="sb-group">Site</p>
+      <button class="sb-btn" onclick="show('siteinfo',this)"><span class="ic">⚙</span>Site Info</button>
+      <button class="sb-btn" onclick="show('export',this)"><span class="ic">💾</span>Export</button>
+    </nav>
+    <div class="sb-foot">
+      <a href="index.html" target="_blank" class="sb-view">↗ View Site</a>
+      <button class="sb-out" onclick="doLogout()">Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="panel on" id="p-dashboard">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Dashboard</h1>
+          <p class="ph-sub">Welcome back, Tsambagarav</p>
+        </div>
+        <button class="btn-add" onclick="show('export',document.querySelector('.sb-btn:last-child'))"><span class="plus">↓</span>Export Site</button>
+      </div>
+      <div class="stats-row" id="statsRow"></div>
+      <div class="guide">
+        <p class="guide-title">Quick Workflow</p>
+        <div class="guide-step"><div class="guide-num">1</div><div class="guide-txt">Go to <strong>Image Library</strong> → drag & drop your photos</div></div>
+        <div class="guide-step"><div class="guide-num">2</div><div class="guide-txt">Go to <strong>Projects</strong> → add a project, assign images from library</div></div>
+        <div class="guide-step"><div class="guide-num">3</div><div class="guide-txt">Go to <strong>Videos</strong> → paste YouTube links for each project</div></div>
+        <div class="guide-step"><div class="guide-num">4</div><div class="guide-txt">Go to <strong>Export</strong> → download <code style="color:var(--accent);font-family:'Space Mono',monospace;">data.js</code> and replace on your server</div></div>
+      </div>
+    </div>
+
+    <!-- IMAGE LIBRARY -->
+    <div class="panel" id="p-imglib">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Image Library</h1>
+          <p class="ph-sub">All photos used across the site</p>
+        </div>
+        <label class="btn-add" style="cursor:pointer;">
+          <span class="plus">+</span>Upload Photos
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="handleUpload(this.files)"/>
+        </label>
+      </div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" accept="image/*" multiple onchange="handleUpload(this.files)"/>
+        <div class="upload-zone-icon">⬆</div>
+        <p class="upload-zone-txt">Drag & drop or <span>click to browse</span></p>
+        <p style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:6px;letter-spacing:2px;text-transform:uppercase;">JPEG · PNG · Multiple files supported</p>
+      </div>
+      <div class="img-grid" id="imgGrid"></div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="panel" id="p-categories">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Categories</h1>
+          <p class="ph-sub">Photography categories shown on site</p>
+        </div>
+        <button class="btn-add" onclick="openCatModal()"><span class="plus">+</span>Add Category</button>
+      </div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="panel" id="p-projects">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Projects</h1>
+          <p class="ph-sub">Photography projects grouped by category</p>
+        </div>
+        <button class="btn-add" onclick="openProjModal()"><span class="plus">+</span>Add Project</button>
+      </div>
+      <div id="projByCat"></div>
+    </div>
+
+    <!-- VIDEOS -->
+    <div class="panel" id="p-videos">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Video Projects</h1>
+          <p class="ph-sub">Paste YouTube links to activate playback</p>
+        </div>
+        <button class="btn-add" onclick="openVidModal()"><span class="plus">+</span>Add Video</button>
+      </div>
+      <div class="vid-list" id="vidList"></div>
+    </div>
+
+    <!-- SITE INFO -->
+    <div class="panel" id="p-siteinfo">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Site Info</h1>
+          <p class="ph-sub">Update your contact and social details</p>
+        </div>
+        <button class="btn-add" onclick="saveSiteInfo()">Save Changes</button>
+      </div>
+      <div class="info-grid" id="infoGrid"></div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="panel" id="p-export">
+      <div class="ph">
+        <div class="ph-left">
+          <h1 class="ph-title">Export</h1>
+          <p class="ph-sub">Download updated data file to deploy</p>
+        </div>
+        <button class="btn-add" onclick="exportData()"><span class="plus">↓</span>Download data.js</button>
+      </div>
+      <div class="export-card">
+        <h2 class="export-title">How to deploy changes</h2>
+        <p class="export-desc">All edits are auto-saved in your browser. Download data.js and replace the file on your server to publish changes live.</p>
+        <div class="export-steps">
+          <div class="export-step"><div class="export-step-num">1</div><div class="export-step-txt">Click <strong style="color:var(--white);">Download data.js</strong> above</div></div>
+          <div class="export-step"><div class="export-step-num">2</div><div class="export-step-txt">Replace <code>data.js</code> in your website folder</div></div>
+          <div class="export-step"><div class="export-step-num">3</div><div class="export-step-txt">Push to GitHub — Netlify auto-deploys in ~30 seconds</div></div>
+        </div>
+      </div>
+      <div class="export-card" style="margin-top:3px;">
+        <h2 class="export-title">Current Data Summary</h2>
+        <div id="exportSummary"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="catModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="modal-title" id="catModalTitle">Add Category</h2>
+      <button class="modal-x" onclick="closeMod('catModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cat-id"/>
+      <div class="fg"><label class="fl">Category Name</label><input class="fi" id="cat-name" placeholder="e.g. Maternity"/></div>
+      <div class="fg"><label class="fl">Cover Image</label><select class="fs" id="cat-cover"><option value="">Select image from library...</option></select></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeMod('catModal')">Cancel</button>
+      <button class="btn-save" onclick="saveCat()">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="projModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="modal-title" id="projModalTitle">Add Project</h2>
+      <button class="modal-x" onclick="closeMod('projModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="proj-id"/>
+      <div class="fr">
+        <div class="fg"><label class="fl">Project Name</label><input class="fi" id="proj-name" placeholder="e.g. Studio Session"/></div>
+        <div class="fg"><label class="fl">Year</label><input class="fi" id="proj-year" placeholder="2025"/></div>
+      </div>
+      <div class="fg"><label class="fl">Category</label><select class="fs" id="proj-cat"></select></div>
+      <div class="fg"><label class="fl">Description</label><textarea class="ft" id="proj-desc" placeholder="Describe this project..."></textarea></div>
+      <div class="fg"><label class="fl">Cover Image</label><select class="fs" id="proj-cover"><option value="">Select cover...</option></select></div>
+      <div class="fg"><label class="fl">Gallery Images <span style="color:var(--accent);">(hold Ctrl/Cmd for multiple)</span></label><select class="fm-select" id="proj-photos" multiple></select></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeMod('projModal')">Cancel</button>
+      <button class="btn-save" onclick="saveProj()">Save Project</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="vidModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="modal-title" id="vidModalTitle">Add Video</h2>
+      <button class="modal-x" onclick="closeMod('vidModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="vid-id"/>
+      <div class="fr">
+        <div class="fg"><label class="fl">Title</label><input class="fi" id="vid-name" placeholder="e.g. Brand Campaign"/></div>
+        <div class="fg"><label class="fl">Year</label><input class="fi" id="vid-year" placeholder="2025"/></div>
+      </div>
+      <div class="fg"><label class="fl">Type</label>
+        <select class="fs" id="vid-type">
+          <option value="youtube">YouTube</option>
+          <option value="commercial">Commercial</option>
+          <option value="film">Film</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">YouTube URL or Video ID</label>
+        <input class="fi" id="vid-ytid" placeholder="https://youtu.be/... or just the ID"/>
+        <p class="fi-hint">Paste full URL — ID will be extracted automatically</p>
+      </div>
+      <div class="fg"><label class="fl">Description</label><textarea class="ft" id="vid-desc" placeholder="Describe this project..."></textarea></div>
+      <div class="fg"><label class="fl">Tags <span style="color:var(--accent);">(comma separated)</span></label><input class="fi" id="vid-tags" placeholder="Direction, Color Grade, Sound"/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeMod('vidModal')">Cancel</button>
+      <button class="btn-save" onclick="saveVid()">Save Video</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── EMBEDDED DATA (fallback if data.js not available) ──
+// Try to load from data.js first, then use embedded state
+let state;
+try {
+  // If data.js is loaded, use it
+  if(window.SITE_DATA) state = JSON.parse(JSON.stringify(window.SITE_DATA));
+} catch(e){}
+
+// ── AUTH ─────────────────────────────────────────────────
+const DEF_PASS='cinemix2025';
+function doLogin(){
+  const p=document.getElementById('pwInput').value;
+  const stored=localStorage.getItem('cmx_pass')||DEF_PASS;
+  if(p===stored){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='grid';
+    initAdmin();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('pwInput').value='';
+  }
+}
+function doLogout(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ── INIT ─────────────────────────────────────────────────
+function initAdmin(){
+  const saved=localStorage.getItem('cmx_state');
+  if(saved){try{state=JSON.parse(saved);}catch(e){}}
+  if(!state){
+    state={
+      site:{name:'Cinemix Media',tagline:'Creating Visual Symphony',owner:'Tsambagarav Namid',location:'Seoul, Korea',email:'hello@cinemixmedia.com',instagram:'#',youtube:'#',behance:'#',showreel:'WOpQvIUVtl0',logo:''},
+      photoCategories:[{id:'body-profile',name:'Body Profile',cover:'img1'},{id:'portrait',name:'Portrait',cover:'img4'},{id:'pregnant',name:'Pregnant',cover:'img3'},{id:'family',name:'Family',cover:'img6'},{id:'children',name:'Children',cover:'img3'}],
+      photoProjects:[{id:'bp-01',category:'body-profile',name:'Shadow & Light',year:'2024',desc:'Dramatic black & white body photography.',cover:'img1',photos:['img1','img2','img5','img6']},{id:'pt-01',category:'portrait',name:'Studio Portrait',year:'2025',desc:'Clean studio portraits.',cover:'img4',photos:['img4','img3','img1']}],
+      videoProjects:[{id:'v-01',type:'youtube',name:'Cinemix Showreel',year:'2024',desc:'A curated highlight reel.',youtubeId:'WOpQvIUVtl0',tags:['Cinematography','Editing','Color Grade']}],
+      images:{}
+    };
+  }
+  renderAll();
+}
+
+function saveState(){localStorage.setItem('cmx_state',JSON.stringify(state));toast('Saved!');}
+function renderAll(){renderStats();renderImgLib();renderCats();renderProjByCat();renderVids();renderSiteInfo();renderExport();}
+
+// ── PANELS ───────────────────────────────────────────────
+function show(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  if(btn)btn.classList.add('on');
+}
+
+// ── TOAST ────────────────────────────────────────────────
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── STATS ────────────────────────────────────────────────
+function renderStats(){
+  const items=[
+    {n:state.photoCategories.length,l:'Categories'},
+    {n:state.photoProjects.length,l:'Projects'},
+    {n:Object.keys(state.images).length,l:'Images'},
+    {n:state.videoProjects.length,l:'Videos'},
+  ];
+  document.getElementById('statsRow').innerHTML=items.map(i=>`
+    <div class="stat-box"><div class="stat-n">${i.n}</div><div class="stat-l">${i.l}</div></div>`).join('');
+}
+
+// ── IMAGE LIBRARY ────────────────────────────────────────
+function handleUpload(files){
+  let count=0;
+  Array.from(files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const id='img_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+      state.images[id]=e.target.result;
+      count++;
+      if(count===files.length){saveState();renderImgLib();renderStats();updateImgSelects();}
+    };
+    reader.readAsDataURL(file);
+  });
+  toast(`Uploading ${files.length} image(s)...`);
+}
+
+function renderImgLib(){
+  const keys=Object.keys(state.images);
+  if(!keys.length){
+    document.getElementById('imgGrid').innerHTML=`<p style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">No images yet — upload some above</p>`;
+    return;
+  }
+  document.getElementById('imgGrid').innerHTML=keys.map(k=>`
+    <div class="img-grid-item">
+      <img src="${state.images[k]}" alt="${k}" loading="lazy"/>
+      <div class="img-grid-ov">
+        <p class="img-id">${k}</p>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="btn-sm btn-sm-e" onclick="copyId('${k}')">Copy ID</button>
+          <button class="btn-sm btn-sm-d" onclick="delImg('${k}')">Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function delImg(id){
+  if(!confirm('Delete this image from library?'))return;
+  delete state.images[id];
+  saveState();renderImgLib();renderStats();updateImgSelects();
+}
+function copyId(id){
+  navigator.clipboard&&navigator.clipboard.writeText(id);
+  toast('Copied: '+id);
+}
+
+function updateImgSelects(){
+  const keys=Object.keys(state.images);
+  const opts='<option value="">Select image...</option>'+keys.map(k=>`<option value="${k}">${k}</option>`).join('');
+  ['cat-cover','proj-cover'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const v=el.value;el.innerHTML=opts;el.value=v;
+  });
+  const mp=document.getElementById('proj-photos');
+  if(mp){
+    const vs=Array.from(mp.selectedOptions).map(o=>o.value);
+    mp.innerHTML=keys.map(k=>`<option value="${k}">${k}</option>`).join('');
+    vs.forEach(v=>{const o=mp.querySelector(`option[value="${v}"]`);if(o)o.selected=true;});
+  }
+}
+
+// ── DRAG UPLOAD ──────────────────────────────────────────
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');handleUpload(e.dataTransfer.files);});
+
+// ── CATEGORIES ───────────────────────────────────────────
+function renderCats(){
+  const grid=document.getElementById('catGrid');
+  grid.innerHTML=state.photoCategories.map(c=>{
+    const img=state.images[c.cover];
+    const count=state.photoProjects.filter(p=>p.category===c.id).length;
+    return `<div class="cat-item" id="cat-${c.id}">
+      ${img?`<img src="${img}" alt="${c.name}" loading="lazy"/>`:`<div style="width:100%;height:100%;background:var(--mid);display:flex;align-items:center;justify-content:center;font-size:32px;opacity:.2;">📁</div>`}
+      <div class="cat-item-ov">
+        <p class="cat-item-count">${count} project${count!==1?'s':''}</p>
+        <h3 class="cat-item-name">${c.name}</h3>
+        <div class="cat-item-acts">
+          <button class="btn-sm btn-sm-e" onclick="openCatModal('${c.id}')">Edit</button>
+          <button class="btn-sm btn-sm-d" onclick="delCat('${c.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')+
+  `<div class="cat-add" onclick="openCatModal()">
+    <div class="cat-add-icon">+</div>
+    <div class="cat-add-txt">Add Category</div>
+  </div>`;
+}
+
+function openCatModal(id){
+  updateImgSelects();
+  document.getElementById('catModalTitle').textContent=id?'Edit Category':'Add Category';
+  document.getElementById('cat-id').value=id||'';
+  if(id){
+    const c=state.photoCategories.find(x=>x.id===id);
+    document.getElementById('cat-name').value=c.name;
+    document.getElementById('cat-cover').value=c.cover;
+  } else {
+    document.getElementById('cat-name').value='';
+    document.getElementById('cat-cover').value='';
+  }
+  document.getElementById('catModal').classList.add('open');
+}
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+function saveCat(){
+  const id=document.getElementById('cat-id').value;
+  const name=document.getElementById('cat-name').value.trim();
+  const cover=document.getElementById('cat-cover').value;
+  if(!name){toast('Name required');return;}
+  if(id){
+    const c=state.photoCategories.find(x=>x.id===id);
+    c.name=name;c.cover=cover;
+  } else {
+    const nid=name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    state.photoCategories.push({id:nid,name,cover});
+  }
+  saveState();closeMod('catModal');renderCats();toast('Category saved!');
+}
+function delCat(id){
+  if(!confirm('Delete category and all its projects?'))return;
+  state.photoCategories=state.photoCategories.filter(c=>c.id!==id);
+  state.photoProjects=state.photoProjects.filter(p=>p.category!==id);
+  saveState();renderCats();renderProjByCat();renderStats();
+}
+
+// ── PROJECTS ─────────────────────────────────────────────
+function renderProjByCat(){
+  const container=document.getElementById('projByCat');
+  if(!state.photoCategories.length){
+    container.innerHTML=`<p style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);">Add categories first</p>`;
+    return;
+  }
+  container.innerHTML=state.photoCategories.map(cat=>{
+    const projs=state.photoProjects.filter(p=>p.category===cat.id);
+    // Dynamic gallery layout
+    const galleryItems = projs.map(p=>{
+      const img=state.images[p.cover];
+      return `<div class="dyn-item" title="${p.name}">
+        ${img?`<img src="${img}" alt="${p.name}" loading="lazy"/>`:`<div class="dyn-item-ph"><span>📸</span><p>${p.name}</p></div>`}
+        <div class="dyn-item-ov">
+          <p class="dyn-item-meta">${cat.name} · ${p.year}</p>
+          <p class="dyn-item-name">${p.name}</p>
+          <div class="dyn-item-actions">
+            <button class="btn-sm btn-sm-e" onclick="event.stopPropagation();openProjModal('${p.id}')">Edit</button>
+            <button class="btn-sm btn-sm-d" onclick="event.stopPropagation();delProj('${p.id}')">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div style="margin-bottom:28px;">
+      <div class="sec-hd">
+        <div>
+          <span class="sec-hd-title">${cat.name}</span>
+          <span class="sec-hd-count" style="margin-left:12px;">${projs.length} project${projs.length!==1?'s':''}</span>
+        </div>
+        <button class="btn-sec" onclick="openProjModalForCat('${cat.id}')"><span style="font-size:14px;">+</span>&nbsp;Add to ${cat.name}</button>
+      </div>
+      ${projs.length?
+        `<div class="dyn-gallery">${galleryItems}</div>`:
+        `<div style="border:1px dashed var(--border);padding:32px;text-align:center;">
+          <p style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;">No projects yet</p>
+          <button class="btn-add" style="margin-top:16px;" onclick="openProjModalForCat('${cat.id}')"><span class="plus">+</span>Add First Project</button>
+        </div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function openProjModal(id){
+  updateImgSelects();
+  const catSel=document.getElementById('proj-cat');
+  catSel.innerHTML=state.photoCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('projModalTitle').textContent=id?'Edit Project':'Add Project';
+  document.getElementById('proj-id').value=id||'';
+  if(id){
+    const p=state.photoProjects.find(x=>x.id===id);
+    document.getElementById('proj-name').value=p.name;
+    document.getElementById('proj-year').value=p.year;
+    document.getElementById('proj-cat').value=p.category;
+    document.getElementById('proj-desc').value=p.desc;
+    document.getElementById('proj-cover').value=p.cover;
+    setTimeout(()=>{
+      const mp=document.getElementById('proj-photos');
+      Array.from(mp.options).forEach(o=>{o.selected=(p.photos||[]).includes(o.value);});
+    },50);
+  } else {
+    document.getElementById('proj-name').value='';
+    document.getElementById('proj-year').value=new Date().getFullYear();
+    document.getElementById('proj-desc').value='';
+    document.getElementById('proj-cover').value='';
+  }
+  document.getElementById('projModal').classList.add('open');
+}
+function openProjModalForCat(catId){
+  openProjModal();
+  setTimeout(()=>{document.getElementById('proj-cat').value=catId;},10);
+}
+function saveProj(){
+  const id=document.getElementById('proj-id').value;
+  const name=document.getElementById('proj-name').value.trim();
+  const year=document.getElementById('proj-year').value.trim();
+  const cat=document.getElementById('proj-cat').value;
+  const desc=document.getElementById('proj-desc').value.trim();
+  const cover=document.getElementById('proj-cover').value;
+  const photos=Array.from(document.getElementById('proj-photos').selectedOptions).map(o=>o.value);
+  if(!name||!cat){toast('Name and category required');return;}
+  if(id){
+    const p=state.photoProjects.find(x=>x.id===id);
+    Object.assign(p,{name,year,category:cat,desc,cover,photos});
+  } else {
+    state.photoProjects.push({id:'p-'+Date.now(),category:cat,name,year,desc,cover,photos});
+  }
+  saveState();closeMod('projModal');renderProjByCat();renderStats();toast('Project saved!');
+}
+function delProj(id){
+  if(!confirm('Delete this project?'))return;
+  state.photoProjects=state.photoProjects.filter(p=>p.id!==id);
+  saveState();renderProjByCat();renderStats();
+}
+
+// ── VIDEOS ───────────────────────────────────────────────
+const typeCls={youtube:'b-yt',commercial:'b-cm',film:'b-fm'};
+const typeLabel={youtube:'YouTube',commercial:'Commercial',film:'Film'};
+function renderVids(){
+  document.getElementById('vidList').innerHTML=state.videoProjects.map(v=>`
+    <div class="vid-row">
+      <div class="vid-thumb-wrap">
+        ${v.youtubeId
+          ?`<img src="https://img.youtube.com/vi/${v.youtubeId}/mqdefault.jpg" alt="${v.name}"/>`
+          :`<div class="vid-thumb-ph">🎬</div>`}
+        ${v.youtubeId?`<div class="vid-play-ic"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`:''}
+      </div>
+      <div class="vid-info">
+        <div class="vid-info-name">${v.name}</div>
+        <div class="vid-info-meta">
+          <span class="badge ${typeCls[v.type]||'b-cm'}">${typeLabel[v.type]||v.type}</span>
+          &nbsp;${v.year}
+        </div>
+        ${v.youtubeId?`<div class="vid-info-yt">▶ ${v.youtubeId}</div>`:`<div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--red);letter-spacing:1px;margin-top:2px;">No YouTube link</div>`}
+      </div>
+      <div class="vid-actions">
+        <button class="btn-sm btn-sm-e" onclick="openVidModal('${v.id}')">Edit</button>
+        <button class="btn-sm btn-sm-d" onclick="delVid('${v.id}')">Delete</button>
+      </div>
+    </div>`).join('')+
+    `<div style="margin-top:3px;border:1px dashed var(--border);padding:20px;text-align:center;">
+      <button class="btn-add" onclick="openVidModal()"><span class="plus">+</span>Add Video Project</button>
+    </div>`;
+}
+
+function extractYTId(s){
+  const m=s.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:s.replace(/\s/g,'').slice(0,11);
+}
+function openVidModal(id){
+  document.getElementById('vidModalTitle').textContent=id?'Edit Video':'Add Video';
+  document.getElementById('vid-id').value=id||'';
+  if(id){
+    const v=state.videoProjects.find(x=>x.id===id);
+    document.getElementById('vid-name').value=v.name;
+    document.getElementById('vid-year').value=v.year;
+    document.getElementById('vid-type').value=v.type;
+    document.getElementById('vid-ytid').value=v.youtubeId||'';
+    document.getElementById('vid-desc').value=v.desc;
+    document.getElementById('vid-tags').value=(v.tags||[]).join(', ');
+  } else {
+    document.getElementById('vid-name').value='';
+    document.getElementById('vid-year').value=new Date().getFullYear();
+    document.getElementById('vid-type').value='youtube';
+    document.getElementById('vid-ytid').value='';
+    document.getElementById('vid-desc').value='';
+    document.getElementById('vid-tags').value='';
+  }
+  document.getElementById('vidModal').classList.add('open');
+}
+function saveVid(){
+  const id=document.getElementById('vid-id').value;
+  const name=document.getElementById('vid-name').value.trim();
+  const year=document.getElementById('vid-year').value.trim();
+  const type=document.getElementById('vid-type').value;
+  const ytRaw=document.getElementById('vid-ytid').value.trim();
+  const youtubeId=ytRaw?extractYTId(ytRaw):'';
+  const desc=document.getElementById('vid-desc').value.trim();
+  const tags=document.getElementById('vid-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  if(!name){toast('Title required');return;}
+  if(id){
+    const v=state.videoProjects.find(x=>x.id===id);
+    Object.assign(v,{name,year,type,youtubeId,desc,tags});
+  } else {
+    state.videoProjects.push({id:'v-'+Date.now(),type,name,year,desc,youtubeId,tags});
+  }
+  saveState();closeMod('vidModal');renderVids();renderStats();toast('Video saved!');
+}
+function delVid(id){
+  if(!confirm('Delete this video?'))return;
+  state.videoProjects=state.videoProjects.filter(v=>v.id!==id);
+  saveState();renderVids();renderStats();
+}
+
+// ── SITE INFO ────────────────────────────────────────────
+const infoFields=[
+  {k:'name',l:'Studio Name'},{k:'owner',l:'Owner Name'},
+  {k:'location',l:'Location'},{k:'email',l:'Email'},
+  {k:'instagram',l:'Instagram URL'},{k:'youtube',l:'YouTube URL'},
+  {k:'behance',l:'Behance URL'},{k:'showreel',l:'Showreel YouTube ID'},
+];
+function renderSiteInfo(){
+  document.getElementById('infoGrid').innerHTML=infoFields.map(f=>`
+    <div class="info-field">
+      <label class="info-label">${f.l}</label>
+      <input class="info-input" id="si-${f.k}" value="${state.site[f.k]||''}" placeholder="${f.l}"/>
+    </div>`).join('')+
+    `<div class="info-field">
+      <label class="info-label">New Admin Password</label>
+      <input class="info-input" type="password" id="si-password" placeholder="Leave blank to keep current"/>
+    </div>`;
+}
+function saveSiteInfo(){
+  infoFields.forEach(f=>{const el=document.getElementById('si-'+f.k);if(el)state.site[f.k]=el.value.trim();});
+  const np=document.getElementById('si-password');
+  if(np&&np.value){localStorage.setItem('cmx_pass',np.value);np.value='';}
+  saveState();toast('Site info saved!');
+}
+
+// ── EXPORT ───────────────────────────────────────────────
+function renderExport(){
+  document.getElementById('exportSummary').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:3px;margin-top:16px;">
+      ${[
+        ['Categories',state.photoCategories.length],
+        ['Photo Projects',state.photoProjects.length],
+        ['Images in Library',Object.keys(state.images).length],
+        ['Video Projects',state.videoProjects.length],
+      ].map(([l,n])=>`<div style="background:var(--mid);padding:14px;"><div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent);">${n}</div><div style="font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">${l}</div></div>`).join('')}
+    </div>`;
+}
+function exportData(){
+  const imgEntries=Object.entries(state.images).map(([k,v])=>`    "${k}": "${v}"`).join(',\n');
+  const out=`// Cinemix Media — Site Data\n// Exported ${new Date().toLocaleDateString()}\n\nwindow.SITE_DATA = {\n\n  site: ${JSON.stringify(state.site,null,2)},\n\n  photoCategories: ${JSON.stringify(state.photoCategories,null,2)},\n\n  photoProjects: ${JSON.stringify(state.photoProjects,null,2)},\n\n  videoProjects: ${JSON.stringify(state.videoProjects,null,2)},\n\n  images: {\n${imgEntries}\n  }\n};\n`;
+  const blob=new Blob([out],{type:'application/javascript'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='data.js';a.click();
+  toast('data.js downloaded!');
+}
+
+// Close modals on bg click
+document.querySelectorAll('.modal-bg').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+</script>
+</body>
+</html>
